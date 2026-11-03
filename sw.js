@@ -1,5 +1,5 @@
 // Offline support: the app works without internet after the first visit.
-const CACHE = 'liza-theory-v1';
+const CACHE = 'liza-theory-v2';
 const IMG_CACHE = 'liza-theory-img';   // sign pictures, kept across versions
 const FILES = ['./', './index.html', './questions.js', './manifest.json', './icon.svg', './icon-192.png', './icon-512.png'];
 
