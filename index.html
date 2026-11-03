@@ -101,7 +101,7 @@
 <div id="app"></div>
 <script src="questions.js"></script>
 <script>
-const APP_VERSION = 2;
+const APP_VERSION = 3;
 // The family Google Sheet (same one as the English app). Progress goes there so the admin page can show it.
 const SYNC_URL = 'https://script.google.com/macros/s/AKfycbzvi2cl7509dBy0b4IC0lCGn7SCWp1PizncMNuVMHlSygvirVN2A8AHjBQIegaw2DdGPg/exec';
 const EXAM_SIZE = 30, EXAM_MINUTES = 40, PASS = 26;
@@ -132,7 +132,7 @@ function summary(){
     .sort((a, b) => (b[1][1] - b[1][0] / 2) - (a[1][1] - a[1][0] / 2)).slice(0, 15)
     .map(([n, st]) => { const r = byNum[n]; return r ? { n: +n, q: Qtext(r), a: Qans(r)[Qok(r)], img: Qimg(r), right: st[0], wrong: st[1], weak: weak(n) } : null; }).filter(Boolean);
   return {
-    id: 'liza-theory', app: 'theory', name: 'ליזה (תיאוריה)', levelName: 'תיאוריה',
+    id: 'theory-' + db.key, app: 'theory', name: 'ליזה (תיאוריה)', levelName: 'תיאוריה',
     earned: Math.round(knownCount(QUESTIONS) / QUESTIONS.length * 100), streak: dayStreak(), lastPlayed: last || null,
     known: knownCount(QUESTIONS), total: QUESTIONS.length, seen: Object.keys(db.s).length,
     weak: QUESTIONS.filter(r => weak(Qn(r))).length, today: db.days[today()] || 0, goalPerDay: DAILY_GOAL,
@@ -141,8 +141,30 @@ function summary(){
     exams: db.exams.slice(-30), hard, version: APP_VERSION
   };
 }
+// Only Liza's own phone reports to the admin page. It gets her personal code from her personal link (#k=CODE)
+// or by typing it. Anyone else who opens the app just practices on their own phone; nothing is sent.
+function takeKeyFromLink(){
+  const m = location.hash.match(/^#k=([A-Za-z0-9]{6,20})$/);
+  if (!m) return;
+  db.key = m[1]; save();
+  history.replaceState(null, '', location.pathname);   // so the code is not passed on if she shares the address
+}
+function askCode(){
+  const m = document.createElement('div');
+  m.className = 'modal';
+  m.innerHTML = `<div><h3>👑 קוד אישי</h3><p>הקוד מופיע בדף הניהול. רק בטלפון של ליזה.</p>
+    <input id="codeIn" style="width:100%;font-size:20px;text-align:center;padding:10px;border:2px solid #e6def5;border-radius:12px;margin-bottom:12px" dir="ltr" autocomplete="off">
+    <div class="act"><button class="btn" data-no>ביטול</button><button class="btn p" data-yes>שמירה</button></div></div>`;
+  m.querySelector('[data-no]').onclick = () => m.remove();
+  m.querySelector('[data-yes]').onclick = () => {
+    const v = m.querySelector('#codeIn').value.trim();
+    if (!/^[A-Za-z0-9]{6,20}$/.test(v)) { m.querySelector('#codeIn').style.borderColor = '#ef4444'; return; }
+    db.key = v; save(); m.remove(); screenHome(); syncNow();
+  };
+  document.body.appendChild(m);
+}
 function syncNow(){
-  if (!SYNC_URL || !navigator.onLine) return;
+  if (!SYNC_URL || !db.key || !navigator.onLine) return;
   fetch(SYNC_URL, { method: 'POST', body: JSON.stringify({ action: 'progress', kid: summary() }) })
     .then(r => r.json()).then(res => {
       if (!res || !res.ok) return;
@@ -266,7 +288,7 @@ function screenHome(){
   ${installBox()}
   <div class="foot">
     <div class="queen">נבנה עבור ליזה כהן המלכה 👑</div>
-    השאלות: המאגר הרשמי של משרד התחבורה (data.gov.il)<br>גרסה ${APP_VERSION}
+    השאלות: המאגר הרשמי של משרד התחבורה (data.gov.il)<br>גרסה ${APP_VERSION} · ${db.key ? '👑 מחובר לניהול' : '<button onclick="askCode()" style="text-decoration:underline;color:inherit">קוד אישי</button>'}
   </div>`, 'home');
 }
 
@@ -516,6 +538,7 @@ window.addEventListener('popstate', () => {
   screen = 'leaving'; screenHome();
 });
 
+takeKeyFromLink();
 screenHome();
 syncNow();
 document.addEventListener('visibilitychange', () => { if (!document.hidden && screen === 'home') syncNow(); });

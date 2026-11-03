@@ -99,17 +99,44 @@ async function load(){
     const res = await (await fetch(SYNC_URL + '?pin=' + encodeURIComponent(pin) + '&t=' + Date.now())).json();
     if (!res.ok){ localStorage.removeItem(PIN_KEY); pin = ''; return screenPin(res.error === 'pin' ? 'הקוד לא נכון' : 'משהו השתבש, נסה שוב'); }
     try { localStorage.setItem(PIN_KEY, pin); } catch(e){}
-    liza = (res.kids || []).find(k => k.app === 'theory') || null;
+    const rows = (res.kids || []).filter(k => k.app === 'theory');
+    // Old version reported under one shared name that anyone with the link could write to: remove it.
+    if (rows.some(k => k.id === 'liza-theory')) fetch(SYNC_URL, { method: 'POST', body: JSON.stringify({ action: 'parent', pin, id: 'liza-theory', remove: true }) }).catch(() => {});
+    const mine = rows.filter(k => String(k.id).startsWith('theory-')).sort((x, y) => (y.lastPlayed || 0) - (x.lastPlayed || 0));
+    liza = mine[0] || null;
+    if (!liza) return createLink();
     render();
   } catch(e){
     if (liza) toast('אין חיבור לאינטרנט'); else app.innerHTML = '<h1>👑 ניהול – ליזה</h1><div class="box center">אין חיבור לאינטרנט<div class="row"><button class="btn" onclick="load()">לנסות שוב</button></div></div>';
   }
 }
 
+// First time: make Liza's secret personal code and save it in the sheet, so every admin device shows the same link.
+async function createLink(){
+  const abc = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  const r = crypto.getRandomValues(new Uint32Array(10));
+  const code = Array.from(r, x => abc[x % abc.length]).join('');
+  try {
+    await fetch(SYNC_URL, { method: 'POST', body: JSON.stringify({ action: 'progress', kid: { id: 'theory-' + code, app: 'theory', name: 'ליזה (תיאוריה)', levelName: 'תיאוריה', earned: 0, streak: 0, waiting: true } }) });
+    load();
+  } catch(e){ toast('אין חיבור לאינטרנט'); }
+}
+const lizaCode = () => String(liza.id).slice(7);
+const lizaLink = () => location.origin + location.pathname.replace(/admin.html$/, '') + '#k=' + lizaCode();
+function linkBox(){
+  const text = 'ליזה, זה הקישור האישי שלך לאפליקציית התיאוריה 👑 ' + lizaLink();
+  return `<div class="box"><h2>📲 הקישור האישי של ליזה</h2>
+    <p class="muted">רק הטלפון שפותח את הקישור הזה מדווח לכאן. מי שפותח את הקישור הרגיל מתרגל לעצמו, ושום דבר לא נשלח לכאן. לא להעביר את הקישור הזה לאחרים.</p>
+    <p dir="ltr" style="background:#f6f2fd;padding:10px;border-radius:12px;margin-top:8px;word-break:break-all;font-size:14px">${esc(lizaLink())}</p>
+    <p class="muted" style="margin-top:6px">באייפון, אם היא כבר התקינה את האפליקציה: מסך הבית ← למטה "קוד אישי" ← <b dir="ltr">${esc(lizaCode())}</b></p>
+    <div class="row"><a class="btn" style="text-align:center;text-decoration:none;background:#25d366" href="https://wa.me/?text=${encodeURIComponent(text)}" target="_blank">שליחה בוואטסאפ</a><button class="btn light" onclick="copyLink()">העתקה</button></div></div>`;
+}
+function copyLink(){ navigator.clipboard.writeText(lizaLink()).then(() => toast('הקישור הועתק'), () => toast('לא הצלחתי להעתיק')); }
+
 function render(){
   const head = `<h1>👑 ניהול – ליזה <button class="btn light small" onclick="load()">🔄 רענון</button></h1>`;
-  if (!liza){
-    app.innerHTML = head + `<div class="box center"><h2>עוד אין נתונים</h2><p class="muted">ברגע שליזה תפתח את אפליקציית התיאוריה (עם אינטרנט), ההתקדמות שלה תופיע כאן.</p></div>`;
+  if (!liza.total){
+    app.innerHTML = head + `<div class="box center"><h2>ממתין לליזה</h2><p class="muted">שלח לליזה את הקישור האישי שלמטה. ברגע שהיא תפתח אותו (עם אינטרנט), ההתקדמות שלה תופיע כאן, כולל כל מה שכבר תרגלה בטלפון שלה.</p></div>` + linkBox();
     return;
   }
   const k = liza, p = k.parent || {}, exams = k.exams || [];
@@ -184,6 +211,7 @@ function render(){
     <p class="muted" style="margin-bottom:6px">אפשר לשאול אותה אותן בעל פה 😉</p>
     ${(k.hard || []).length ? k.hard.map(q => `<div class="q">${q.img ? `<img src="img/${esc(q.img)}" alt="">` : ''}<b>${esc(q.q)}</b><br><span class="c">✓ ${esc(q.a)}</span><br><span class="w">טעתה ${q.wrong} ${q.wrong === 1 ? 'פעם' : 'פעמים'} · צדקה ${q.right} ${q.weak ? '' : '· כבר יודעת ✅'}</span><div style="clear:both"></div></div>`).join('') : '<p class="muted">עוד אין טעויות</p>'}
   </div>
+  ${linkBox()}
   <p class="center muted">עודכן ${ago(k.lastPlayed)} · גרסת האפליקציה שלה: ${k.version || '?'}</p>`;
 }
 
