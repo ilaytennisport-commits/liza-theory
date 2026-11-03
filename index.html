@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>תיאוריה עם ליזה</title>
+<meta name="theme-color" content="#8b5cf6">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{background:#f6f2fd}
+  body{font-family:Rubik,"Segoe UI",Arial,sans-serif;color:#2b2140;min-height:100vh;padding-bottom:env(safe-area-inset-bottom)}
+  #app{max-width:560px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column}
+  button{font-family:inherit;cursor:pointer;border:0;background:none;color:inherit;font-size:inherit;text-align:inherit}
+  .hero{background:linear-gradient(135deg,#8b5cf6,#ec4899);color:#fff;padding:calc(22px + env(safe-area-inset-top)) 20px 22px;border-radius:0 0 28px 28px}
+  .hero .hi{font-size:15px;opacity:.92}
+  .hero h1{font-size:26px;font-weight:800;margin:2px 0 14px}
+  .ready{display:flex;align-items:center;gap:14px;background:rgba(255,255,255,.18);padding:12px;border-radius:18px}
+  .ring{width:74px;height:74px;border-radius:50%;display:grid;place-items:center;flex:none}
+  .ring b{width:58px;height:58px;border-radius:50%;background:#b05ad6;display:grid;place-items:center;font-size:18px}
+  .ready small{display:block;opacity:.92;font-size:13px;margin-top:3px;line-height:1.4}
+  .streak{display:flex;gap:6px;margin:16px 18px 4px;align-items:center;font-size:14px;color:#6b5f86;flex-wrap:wrap}
+  .pill{background:#fff4d6;color:#a86b00;padding:4px 10px;border-radius:12px;font-weight:700}
+  .goal{margin:8px 18px 4px;height:8px;background:#eee8f8;border-radius:5px;overflow:hidden}
+  .goal i{display:block;height:100%;background:linear-gradient(90deg,#f59e0b,#ec4899);border-radius:5px}
+  .btns{padding:10px 16px;display:grid;gap:10px}
+  .big{display:flex;align-items:center;gap:12px;padding:15px;border-radius:18px;font-weight:700;font-size:17px;width:100%}
+  .big .ic{font-size:28px}
+  .big small{display:block;font-weight:400;font-size:13px;opacity:.8;margin-top:2px}
+  .big:active{transform:scale(.98)}
+  .b1{background:#2b2140;color:#fff}.b2{background:#ece4ff}.b3{background:#ffe2ee}.b4{background:#dff6e8}.b5{background:#fff1d6}
+  .foot{text-align:center;color:#8a7fa3;font-size:12.5px;padding:14px 16px 24px;line-height:1.7}
+  .queen{font-size:16px;font-weight:800;background:linear-gradient(90deg,#8b5cf6,#ec4899);-webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:4px}
+  .note{margin:6px 16px;background:#fff;border-radius:16px;padding:12px 14px;font-size:14px;line-height:1.5}
+  .top{display:flex;justify-content:space-between;align-items:center;padding:calc(14px + env(safe-area-inset-top)) 14px 8px;font-size:14.5px;color:#6b5f86;gap:8px}
+  .back{background:#fff;border-radius:12px;padding:7px 12px;font-weight:700;color:#5b3fa8;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+  .timer{background:#ece4ff;color:#5b3fa8;padding:5px 11px;border-radius:12px;font-weight:700;font-variant-numeric:tabular-nums}
+  .timer.low{background:#ffe2e2;color:#c0262d}
+  .bar{height:7px;margin:0 16px;background:#e9e2f6;border-radius:5px;overflow:hidden}
+  .bar i{display:block;height:100%;background:linear-gradient(90deg,#ec4899,#8b5cf6);transition:width .3s}
+  .tag{margin:14px 16px 6px;font-size:13px;color:#8b5cf6;font-weight:700}
+  .q{margin:0 16px;font-size:20px;font-weight:700;line-height:1.4}
+  .qimg{margin:12px 16px 4px;background:#fff;border-radius:16px;display:grid;place-items:center;padding:8px}
+  .qimg img{max-width:100%;max-height:200px;border-radius:8px}
+  .ans{margin:10px 16px 0;display:grid;gap:9px}
+  .a{padding:13px 14px;border-radius:15px;border:2px solid #e6def5;background:#fff;font-size:16px;line-height:1.4;display:flex;gap:10px;align-items:flex-start;width:100%}
+  .a .l{flex:none;width:24px;height:24px;border-radius:50%;background:#f1ebff;color:#5b3fa8;font-weight:700;font-size:13px;display:grid;place-items:center;margin-top:1px}
+  .a.sel{border-color:#8b5cf6;background:#f3edff}
+  .a.sel .l{background:#8b5cf6;color:#fff}
+  .a.ok{border-color:#22c55e;background:#e8f8ef}.a.ok .l{background:#22c55e;color:#fff}
+  .a.bad{border-color:#ef4444;background:#fdecec}.a.bad .l{background:#ef4444;color:#fff}
+  .a.dim{opacity:.5}
+  .msg{margin:12px 16px 0;border-radius:14px;padding:11px 13px;font-size:15px;font-weight:500}
+  .msg.good{background:#e8f8ef;color:#15803d}.msg.oops{background:#fff4d6;color:#7a5a00}
+  .act{margin:14px 16px 18px;display:flex;gap:10px}
+  .btn{flex:1;padding:14px;border-radius:16px;text-align:center;font-weight:700;font-size:16px;background:#ece4ff;color:#5b3fa8}
+  .btn.p{background:#8b5cf6;color:#fff}.btn.d{background:#2b2140;color:#fff}
+  .btn:disabled{opacity:.4}
+  .dots{display:flex;flex-wrap:wrap;gap:6px;margin:4px 16px 0;justify-content:center}
+  .dot{width:30px;height:30px;border-radius:9px;background:#fff;border:2px solid #e6def5;font-size:12.5px;font-weight:700;display:grid;place-items:center;color:#6b5f86}
+  .dot.done{background:#ddd0fb;border-color:#ddd0fb;color:#4c2f9a}
+  .dot.cur{border-color:#8b5cf6;color:#8b5cf6}
+  .res{background:linear-gradient(180deg,#e8f8ef,#f6f2fd 60%);padding:calc(30px + env(safe-area-inset-top)) 18px 10px;text-align:center}
+  .res.fail{background:linear-gradient(180deg,#fff1d6,#f6f2fd 60%)}
+  .res .emo{font-size:66px}
+  .res h2{font-size:30px;font-weight:800;margin:4px 0 2px}
+  .res .score{font-size:46px;font-weight:800;margin:8px 0 0}
+  .res .score small{font-size:19px;color:#6b5f86;font-weight:500}
+  .res p{color:#6b5f86;font-size:15px;margin-top:4px;line-height:1.5}
+  .cats{margin:18px 16px 0;display:grid;gap:10px}
+  .cat{font-size:14.5px}
+  .cat>div{display:flex;justify-content:space-between;margin-bottom:4px}
+  .meter{height:9px;background:#e9e2f6;border-radius:5px;overflow:hidden}
+  .meter i{display:block;height:100%;border-radius:5px}
+  .rev{margin:10px 16px;background:#fff;border-radius:16px;padding:13px 14px;font-size:15px;line-height:1.5}
+  .rev img{max-width:100%;max-height:120px;display:block;margin:6px auto;border-radius:6px}
+  .rev .y{color:#c0262d;margin-top:6px}.rev .c{color:#15803d;font-weight:700;margin-top:2px}
+  h2.sec{margin:20px 18px 8px;font-size:21px}
+  .topic{display:flex;align-items:center;gap:12px;background:#fff;margin:0 16px 10px;padding:14px;border-radius:18px;width:calc(100% - 32px)}
+  .topic .ic{font-size:30px}
+  .topic .t{flex:1}
+  .topic b{font-size:17px}
+  .topic small{display:block;color:#6b5f86;font-size:13px;margin:2px 0 6px}
+  .card{margin:16px;min-height:340px;background:#fff;border-radius:22px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:18px;text-align:center;box-shadow:0 6px 18px rgba(80,40,140,.1);width:calc(100% - 32px)}
+  .card img{max-width:100%;max-height:220px}
+  .card .hint{color:#8a7fa3;margin-top:14px;font-size:14px}
+  .card .ansT{font-size:20px;font-weight:700;color:#15803d;margin-top:16px;line-height:1.4}
+  .modal{position:fixed;inset:0;background:rgba(30,20,50,.5);display:grid;place-items:center;padding:20px;z-index:9}
+  .modal>div{background:#fff;border-radius:20px;padding:20px;max-width:360px;width:100%;text-align:center}
+  .modal h3{font-size:20px;margin-bottom:6px}
+  .modal p{color:#6b5f86;margin-bottom:14px;line-height:1.5}
+  .modal .act{margin:0}
+  .confetti{position:fixed;top:-20px;font-size:26px;pointer-events:none;animation:fall 2.6s linear forwards;z-index:10}
+  @keyframes fall{to{transform:translateY(110vh) rotate(540deg)}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script src="questions.js"></script>
+<script>
+const APP_VERSION = 1;
+const EXAM_SIZE = 30, EXAM_MINUTES = 40, PASS = 26;
+const EXAM_MIX = [9, 12, 7, 2];               // questions per topic in a practice exam (adds up to 30)
+const DAILY_GOAL = 40;
+const TOPIC_ICONS = ['🚦', '📖', '🛡️', '🔧'];
+const LETTERS = ['א', 'ב', 'ג', 'ד'];
+const KEY = 'lizaTheory';
+
+const byNum = {};
+QUESTIONS.forEach(r => byNum[r[0]] = r);
+const Qn = r => r[0], Qtext = r => r[1], Qans = r => r[2], Qok = r => r[3], Qimg = r => r[4], Qtopic = r => r[5];
+
+// ---------- saved progress ----------
+let db = load();
+function load(){
+  try { const d = JSON.parse(localStorage.getItem(KEY)); if (d && d.s) return d; } catch(e){}
+  return { s: {}, days: {}, exams: [], exam: null, seen: 0 };
+}
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(db)); } catch(e){} }
+const today = () => { const d = new Date(); return d.getFullYear() + '-' + (d.getMonth()+1) + '-' + d.getDate(); };
+
+// stat per question: [right, wrong, streak of right answers in a row, last time]
+function record(n, right){
+  const st = db.s[n] || [0, 0, 0, 0];
+  if (right){ st[0]++; st[2]++; } else { st[1]++; st[2] = 0; }
+  st[3] = Date.now();
+  db.s[n] = st;
+  db.days[today()] = (db.days[today()] || 0) + 1;
+  save();
+}
+const known = n => db.s[n] && db.s[n][2] >= 1;                    // last answer was right
+const weak = n => db.s[n] && db.s[n][1] > 0 && db.s[n][2] < 2;     // got it wrong and not yet right twice in a row
+const knownCount = list => list.filter(r => known(Qn(r))).length;
+function dayStreak(){
+  let n = 0; const d = new Date();
+  if (!db.days[today()]) d.setDate(d.getDate() - 1);
+  for (;;){
+    const k = d.getFullYear() + '-' + (d.getMonth()+1) + '-' + d.getDate();
+    if (!db.days[k]) return n;
+    n++; d.setDate(d.getDate() - 1);
+  }
+}
+
+// ---------- helpers ----------
+const $app = document.getElementById('app');
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function shuffle(a){ a = a.slice(); for (let i = a.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+// Answer order is mixed, but "all the answers..." stays last.
+function answerOrder(r){
+  const idx = [0, 1, 2, 3];
+  const fixed = idx.filter(i => /^כל התשובות/.test(Qans(r)[i]));
+  return shuffle(idx.filter(i => !fixed.includes(i))).concat(fixed);
+}
+const imgTag = r => Qimg(r) ? `<div class="qimg"><img src="img/${Qimg(r)}" alt="" onerror="this.parentNode.style.display='none'"></div>` : '';
+let screen = 'home', timerId = null;
+function show(html, name){
+  clearInterval(timerId);
+  if (screen === 'home' && name !== 'home') history.pushState({s: 1}, '');
+  screen = name;
+  $app.innerHTML = html;
+  window.scrollTo(0, 0);
+}
+function modal(title, text, yes, no, onYes){
+  const m = document.createElement('div');
+  m.className = 'modal';
+  m.innerHTML = `<div><h3>${title}</h3><p>${text}</p><div class="act"><button class="btn" data-no>${no}</button><button class="btn p" data-yes>${yes}</button></div></div>`;
+  m.querySelector('[data-no]').onclick = () => m.remove();
+  m.querySelector('[data-yes]').onclick = () => { m.remove(); onYes(); };
+  document.body.appendChild(m);
+}
+function confetti(){
+  const items = ['🎉', '👑', '⭐', '🚗', '💜', '✨'];
+  for (let i = 0; i < 28; i++){
+    const e = document.createElement('div');
+    e.className = 'confetti';
+    e.textContent = items[i % items.length];
+    e.style.left = Math.random() * 100 + 'vw';
+    e.style.animationDelay = Math.random() * .8 + 's';
+    document.body.appendChild(e);
+    setTimeout(() => e.remove(), 3600);
+  }
+}
+const PRAISE = ['כל הכבוד! 🎉', 'נכון! את מלכה 👑', 'מעולה! ✨', 'בדיוק! 💜', 'יפה מאוד! 🚗', 'צדקת! 🌟'];
+const OOPS = ['לא נורא, ככה לומדים 💪', 'כמעט! התשובה הנכונה בירוק', 'עכשיו את כבר יודעת 😉'];
+const pick = a => a[Math.floor(Math.random() * a.length)];
+
+// ---------- home ----------
+function screenHome(){
+  const total = QUESTIONS.length, k = knownCount(QUESTIONS);
+  const pct = Math.round(k / total * 100);
+  const weakCount = QUESTIONS.filter(r => weak(Qn(r))).length;
+  const todayCount = db.days[today()] || 0, streak = dayStreak();
+  const last = db.exams.slice(-5), passedRow = (() => { let n = 0; for (let i = db.exams.length - 1; i >= 0 && db.exams[i].score >= PASS; i--) n++; return n; })();
+  let readyText = `ענית נכון על ${k.toLocaleString()} מתוך ${total.toLocaleString()} שאלות`;
+  if (passedRow >= 5) readyText = 'עברת 5 מבחנים ברצף – את מוכנה למבחן האמיתי! 👑';
+  else if (db.exams.length) readyText += `<br>מבחנים שעברת ברצף: ${passedRow} מתוך 5`;
+  const hour = new Date().getHours();
+  const hi = hour < 12 ? 'בוקר טוב' : hour < 18 ? 'צהריים טובים' : 'ערב טוב';
+  const exam = db.exam && examTimeLeft() > 0 ? db.exam : null;
+  show(`
+  <div class="hero">
+    <div class="hi">${hi} 👋</div>
+    <h1>ליזה, היום עוברים!</h1>
+    <div class="ready">
+      <div class="ring" style="background:conic-gradient(#fff 0 ${pct}%,rgba(255,255,255,.3) 0)"><b>${pct}%</b></div>
+      <div><b>מוכנות למבחן</b><small>${readyText}</small></div>
+    </div>
+  </div>
+  <div class="streak">🔥 <span class="pill">${streak} ${streak === 1 ? 'יום' : 'ימים'} ברצף</span> · היום: ${todayCount} / ${DAILY_GOAL} שאלות ${todayCount >= DAILY_GOAL ? '✅' : ''}</div>
+  <div class="goal"><i style="width:${Math.min(100, todayCount / DAILY_GOAL * 100)}%"></i></div>
+  <div class="btns">
+    ${exam ? `<button class="big b5" onclick="screenExamQ()"><span class="ic">⏳</span><div>להמשיך את המבחן<small>נשארו ${Math.ceil(examTimeLeft() / 60000)} דקות</small></div></button>` : ''}
+    <button class="big b1" onclick="startExam()"><span class="ic">📝</span><div>מבחן כמו האמיתי<small>${EXAM_SIZE} שאלות · ${EXAM_MINUTES} דקות · עוברים עם ${PASS}</small></div></button>
+    <button class="big b2" onclick="screenTopics()"><span class="ic">📚</span><div>תרגול לפי נושא<small>תמרורים · חוקי התנועה · בטיחות · הכרת הרכב</small></div></button>
+    <button class="big b3" onclick="startMistakes()"><span class="ic">❌</span><div>השאלות שטעיתי בהן<small>${weakCount ? weakCount + ' שאלות מחכות לחזרה' : 'אין כרגע – כל הכבוד!'}</small></div></button>
+    <button class="big b4" onclick="startCards()"><span class="ic">🚦</span><div>כרטיסיות תמרורים<small>רואים תמרור, נזכרים, הופכים</small></div></button>
+  </div>
+  ${last.length ? `<div class="note">📊 מבחנים אחרונים: ${last.map(e => `<b style="color:${e.score >= PASS ? '#15803d' : '#c0262d'}">${e.score}</b>`).join(' · ')}</div>` : ''}
+  ${installBox()}
+  <div class="foot">
+    <div class="queen">נבנה עבור ליזה כהן המלכה 👑</div>
+    השאלות: המאגר הרשמי של משרד התחבורה (data.gov.il)<br>גרסה ${APP_VERSION}
+  </div>`, 'home');
+}
+
+// ---------- install ----------
+let installEvt = null;
+const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+const isStandalone = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEvt = e; if (screen === 'home') screenHome(); });
+function installBox(){
+  if (isStandalone()) return '';
+  if (installEvt) return `<div class="note"><button class="btn p" style="width:100%" onclick="installApp()">📲 להתקין את האפליקציה בטלפון</button></div>`;
+  if (isIOS) return `<div class="note">📲 להתקנה באייפון: לוחצים על <b>שיתוף</b> ואז <b>"הוספה למסך הבית"</b></div>`;
+  return '';
+}
+async function installApp(){
+  if (!installEvt) return;
+  installEvt.prompt();
+  await installEvt.userChoice;
+  installEvt = null; screenHome();
+}
+
+// ---------- practice ----------
+let prac = null;   // {title, list:[q numbers], i, right, order, answered, retry}
+function screenTopics(){
+  show(`<div class="top"><button class="back" onclick="goHome()">→ חזרה</button><span></span></div>
+  <h2 class="sec">📚 על מה מתרגלים?</h2>
+  ${TOPICS.map((t, i) => {
+    const list = QUESTIONS.filter(r => Qtopic(r) === i), k = knownCount(list), p = Math.round(k / list.length * 100);
+    return `<button class="topic" onclick="startTopic(${i})"><span class="ic">${TOPIC_ICONS[i]}</span><span class="t"><b>${t}</b><small>יודעת ${k} מתוך ${list.length}</small><span class="meter" style="display:block"><i style="width:${p}%;background:#8b5cf6"></i></span></span></button>`;
+  }).join('')}
+  <button class="topic" onclick="startTopic(-1)"><span class="ic">🎲</span><span class="t"><b>הכול מעורבב</b><small>שאלות מכל הנושאים</small></span></button>
+  `, 'topics');
+}
+// 20 questions: some she got wrong, then ones she has not seen, then the ones she knows least.
+function smartPick(pool, size){
+  const w = shuffle(pool.filter(r => weak(Qn(r))));
+  const fresh = shuffle(pool.filter(r => !db.s[Qn(r)]));
+  const rest = shuffle(pool.filter(r => db.s[Qn(r)] && !weak(Qn(r)))).sort((a, b) => db.s[Qn(a)][2] - db.s[Qn(b)][2] || db.s[Qn(a)][3] - db.s[Qn(b)][3]);
+  const out = w.slice(0, 6);
+  for (const r of fresh.concat(w.slice(6), rest)){ if (out.length >= size) break; if (!out.includes(r)) out.push(r); }
+  return shuffle(out).map(Qn);
+}
+function startTopic(t){
+  const pool = t < 0 ? QUESTIONS : QUESTIONS.filter(r => Qtopic(r) === t);
+  startPractice(t < 0 ? 'הכול מעורבב' : TOPICS[t], smartPick(pool, 20), 'topic:' + t);
+}
+function startMistakes(){
+  const list = shuffle(QUESTIONS.filter(r => weak(Qn(r)))).slice(0, 20).map(Qn);
+  if (!list.length){ modal('אין טעויות! 🎉', 'כרגע אין שאלות לחזור עליהן. אפשר לתרגל לפי נושא.', 'לתרגול', 'סגירה', screenTopics); return; }
+  startPractice('חזרה על טעויות', list, 'mistakes');
+}
+function startPractice(title, list, kind){
+  prac = { title, list, i: 0, right: 0, kind, answered: null, order: null, missed: [] };
+  practiceQ();
+}
+function practiceQ(){
+  const r = byNum[prac.list[prac.i]];
+  if (!prac.order) prac.order = answerOrder(r);
+  const done = prac.answered != null;
+  show(`<div class="top"><button class="back" onclick="leavePractice()">✕</button><span>${esc(prac.title)} · ${prac.i + 1} / ${prac.list.length}</span><span class="pill" style="background:#e8f8ef;color:#15803d">✓ ${prac.right}</span></div>
+  <div class="bar"><i style="width:${(prac.i + (done ? 1 : 0)) / prac.list.length * 100}%"></i></div>
+  <div class="tag">${TOPIC_ICONS[Qtopic(r)]} ${TOPICS[Qtopic(r)]}</div>
+  <div class="q">${esc(Qtext(r))}</div>
+  ${imgTag(r)}
+  <div class="ans">${prac.order.map((ai, k) => {
+    let c = '';
+    if (done){ c = ai === Qok(r) ? 'ok' : ai === prac.answered ? 'bad' : 'dim'; }
+    return `<button class="a ${c}" ${done ? 'disabled' : `onclick="practiceAnswer(${ai})"`}><span class="l">${LETTERS[k]}</span><span>${esc(Qans(r)[ai])}</span></button>`;
+  }).join('')}</div>
+  ${done ? `<div class="msg ${prac.answered === Qok(r) ? 'good' : 'oops'}">${prac.answered === Qok(r) ? pick(PRAISE) : pick(OOPS)}</div>
+  <div class="act"><button class="btn p" onclick="practiceNext()">${prac.i + 1 < prac.list.length ? 'לשאלה הבאה ←' : 'לסיכום 🏁'}</button></div>` : ''}
+  `, 'practice');
+}
+function practiceAnswer(ai){
+  const r = byNum[prac.list[prac.i]];
+  prac.answered = ai;
+  const ok = ai === Qok(r);
+  if (ok) prac.right++; else prac.missed.push(Qn(r));
+  record(Qn(r), ok);
+  practiceQ();
+}
+function practiceNext(){
+  prac.i++; prac.answered = null; prac.order = null;
+  if (prac.i < prac.list.length) practiceQ(); else practiceEnd();
+}
+function practiceEnd(){
+  const n = prac.list.length, p = prac.right / n;
+  if (p >= .8) confetti();
+  show(`<div class="res ${p >= .8 ? '' : 'fail'}">
+    <div class="emo">${p >= .9 ? '👑' : p >= .7 ? '🌟' : '💪'}</div>
+    <h2>${p >= .9 ? 'מושלם!' : p >= .7 ? 'יופי של תרגול!' : 'ממשיכים להתאמן!'}</h2>
+    <div class="score">${prac.right} <small>/ ${n}</small></div>
+    <p>${prac.missed.length ? 'השאלות שטעית בהן יחזרו ב"שאלות שטעיתי בהן"' : 'בלי אף טעות! 🎉'}</p>
+  </div>
+  <div class="act" style="flex-direction:column">
+    <button class="btn p" onclick="${prac.kind === 'mistakes' ? 'startMistakes()' : `startTopic(${prac.kind.split(':')[1]})`}">🔁 עוד סבב</button>
+    <button class="btn" onclick="goHome()">🏠 למסך הבית</button>
+  </div>`, 'practiceEnd');
+}
+function leavePractice(){
+  if (prac && prac.i > 0) practiceEnd(); else goHome();
+}
+
+// ---------- exam ----------
+function startExam(){
+  if (db.exam && examTimeLeft() > 0){
+    modal('יש מבחן פתוח', 'להתחיל מבחן חדש? המבחן הפתוח יימחק.', 'מבחן חדש', 'ביטול', newExam);
+    return;
+  }
+  newExam();
+}
+function newExam(){
+  let list = [];
+  EXAM_MIX.forEach((count, t) => { list = list.concat(shuffle(QUESTIONS.filter(r => Qtopic(r) === t)).slice(0, count)); });
+  list = shuffle(list);
+  db.exam = { q: list.map(Qn), order: list.map(answerOrder), a: list.map(() => null), i: 0, end: Date.now() + EXAM_MINUTES * 60000 };
+  save();
+  screenExamQ();
+}
+const examTimeLeft = () => db.exam ? db.exam.end - Date.now() : 0;
+const fmt = ms => { const s = Math.max(0, Math.ceil(ms / 1000)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
+function screenExamQ(){
+  const ex = db.exam;
+  if (!ex) return goHome();
+  if (examTimeLeft() <= 0) return finishExam(true);
+  const r = byNum[ex.q[ex.i]], answered = ex.a.filter(x => x != null).length;
+  show(`<div class="top"><button class="back" onclick="askLeaveExam()">✕</button><span>שאלה ${ex.i + 1} מתוך ${EXAM_SIZE}</span><span class="timer" id="timer">⏱ ${fmt(examTimeLeft())}</span></div>
+  <div class="bar"><i style="width:${answered / EXAM_SIZE * 100}%"></i></div>
+  <div class="q" style="margin-top:16px">${esc(Qtext(r))}</div>
+  ${imgTag(r)}
+  <div class="ans">${ex.order[ex.i].map((ai, k) => `<button class="a ${ex.a[ex.i] === ai ? 'sel' : ''}" onclick="examAnswer(${ai})"><span class="l">${LETTERS[k]}</span><span>${esc(Qans(r)[ai])}</span></button>`).join('')}</div>
+  <div class="act">
+    <button class="btn" onclick="examGo(${ex.i - 1})" ${ex.i ? '' : 'disabled'}>→ הקודמת</button>
+    ${ex.i + 1 < EXAM_SIZE ? `<button class="btn p" onclick="examGo(${ex.i + 1})">הבאה ←</button>` : `<button class="btn d" onclick="askFinishExam()">🏁 סיום מבחן</button>`}
+  </div>
+  <div class="dots">${ex.q.map((_, k) => `<button class="dot ${ex.a[k] != null ? 'done' : ''} ${k === ex.i ? 'cur' : ''}" onclick="examGo(${k})">${k + 1}</button>`).join('')}</div>
+  <div class="act"><button class="btn" onclick="askFinishExam()">🏁 סיום והגשה</button></div>
+  `, 'exam');
+  timerId = setInterval(() => {
+    const left = examTimeLeft(), el = document.getElementById('timer');
+    if (left <= 0){ clearInterval(timerId); finishExam(true); return; }
+    if (el){ el.textContent = '⏱ ' + fmt(left); el.classList.toggle('low', left < 5 * 60000); }
+  }, 1000);
+}
+function examAnswer(ai){
+  const ex = db.exam;
+  ex.a[ex.i] = ai; save();
+  // move on by itself after a short moment, like flipping the page
+  if (ex.i + 1 < EXAM_SIZE){ screenExamQ(); setTimeout(() => { if (screen === 'exam' && db.exam === ex && ex.a[ex.i] === ai) examGo(ex.i + 1); }, 350); }
+  else screenExamQ();
+}
+function examGo(k){ if (k < 0 || k >= EXAM_SIZE) return; db.exam.i = k; save(); screenExamQ(); }
+function askFinishExam(){
+  const left = db.exam.a.filter(x => x == null).length;
+  modal('להגיש את המבחן?', left ? `נשארו ${left} שאלות בלי תשובה. הן ייחשבו כטעות.` : 'עניתי על הכול – רוצה לראות את התוצאה?', 'להגיש', 'עוד לא', () => finishExam(false));
+}
+function askLeaveExam(){
+  modal('לצאת מהמבחן?', 'המבחן נשמר. אפשר להמשיך אותו ממסך הבית כל עוד הזמן לא נגמר.', 'לצאת', 'להישאר', goHome);
+}
+function finishExam(timeUp){
+  const ex = db.exam; if (!ex) return goHome();
+  const byTopic = TOPICS.map(() => [0, 0]);
+  const wrong = [];
+  let score = 0;
+  ex.q.forEach((n, k) => {
+    const r = byNum[n], ok = ex.a[k] === Qok(r);
+    byTopic[Qtopic(r)][1]++;
+    if (ok){ score++; byTopic[Qtopic(r)][0]++; } else wrong.push(k);
+    if (ex.a[k] != null) record(n, ok); else { const st = db.s[n] || [0, 0, 0, 0]; st[1]++; st[2] = 0; st[3] = Date.now(); db.s[n] = st; }
+  });
+  const used = Math.min(EXAM_MINUTES * 60000, EXAM_MINUTES * 60000 - (ex.end - Date.now()));
+  db.exams.push({ d: Date.now(), score, t: byTopic });
+  db.exam = null; save();
+  const pass = score >= PASS;
+  if (pass) confetti();
+  window.lastExam = { ex, wrong };
+  show(`<div class="res ${pass ? '' : 'fail'}">
+    <div class="emo">${pass ? '🏆' : '💪'}</div>
+    <h2 style="color:${pass ? '#15803d' : '#b45309'}">${pass ? 'עברת! 👑' : 'הפעם לא, בפעם הבאה כן!'}</h2>
+    <div class="score">${score} <small>/ ${EXAM_SIZE}</small></div>
+    <p>צריך ${PASS} כדי לעבור${timeUp ? ' · הזמן נגמר' : ' · סיימת ב-' + Math.max(1, Math.round(used / 60000)) + ' דקות'}</p>
+  </div>
+  <div class="cats">${byTopic.map((x, t) => x[1] ? `<div class="cat"><div><span>${TOPIC_ICONS[t]} ${TOPICS[t]}</span><b>${x[0]}/${x[1]}</b></div><div class="meter"><i style="width:${x[0] / x[1] * 100}%;background:${x[0] === x[1] ? '#22c55e' : x[0] / x[1] >= .75 ? '#f59e0b' : '#ef4444'}"></i></div></div>` : '').join('')}</div>
+  <div class="act" style="flex-direction:column">
+    ${wrong.length ? `<button class="btn" style="background:#ffe2ee;color:#9d174d" onclick="screenExamReview()">❌ לראות את ${wrong.length === 1 ? 'הטעות' : wrong.length + ' הטעויות'}</button>` : ''}
+    <button class="btn d" onclick="newExam()">📝 עוד מבחן</button>
+    <button class="btn" onclick="goHome()">🏠 למסך הבית</button>
+  </div>`, 'examEnd');
+}
+function screenExamReview(){
+  const { ex, wrong } = window.lastExam;
+  show(`<div class="top"><button class="back" onclick="goHome()">→ למסך הבית</button><span></span></div>
+  <h2 class="sec">❌ הטעויות במבחן</h2>
+  ${wrong.map(k => { const r = byNum[ex.q[k]], mine = ex.a[k];
+    return `<div class="rev"><b>${esc(Qtext(r))}</b>${Qimg(r) ? `<img src="img/${Qimg(r)}" alt="">` : ''}
+    <div class="y">✗ ${mine == null ? 'לא ענית' : 'ענית: ' + esc(Qans(r)[mine])}</div>
+    <div class="c">✓ ${esc(Qans(r)[Qok(r)])}</div></div>`; }).join('')}
+  <div class="act"><button class="btn d" onclick="newExam()">📝 עוד מבחן</button></div>`, 'review');
+}
+
+// ---------- sign flashcards ----------
+let cards = null;
+function startCards(){
+  const pool = QUESTIONS.filter(r => Qtopic(r) === 0 && Qimg(r) && /התמרור/.test(Qtext(r)));
+  cards = { list: smartPick(pool, 20), i: 0, flip: false, knew: 0 };
+  cardScreen();
+}
+function cardScreen(){
+  const r = byNum[cards.list[cards.i]];
+  show(`<div class="top"><button class="back" onclick="cardsEnd()">✕</button><span>כרטיסיות תמרורים · ${cards.i + 1} / ${cards.list.length}</span><span class="pill" style="background:#e8f8ef;color:#15803d">✓ ${cards.knew}</span></div>
+  <div class="bar"><i style="width:${cards.i / cards.list.length * 100}%"></i></div>
+  <button class="card" onclick="cardFlip()">
+    <img src="img/${Qimg(r)}" alt="" onerror="this.style.display='none'">
+    <div style="font-weight:700;margin-top:12px">${esc(Qtext(r))}</div>
+    ${cards.flip ? `<div class="ansT">${esc(Qans(r)[Qok(r)])}</div>` : '<div class="hint">👆 נסי להיזכר ואז לחצי כדי לראות</div>'}
+  </button>
+  ${cards.flip ? `<div class="act"><button class="btn" style="background:#ffe2ee;color:#9d174d" onclick="cardNext(false)">😅 עוד לא ידעתי</button><button class="btn" style="background:#dff6e8;color:#15803d" onclick="cardNext(true)">😎 ידעתי!</button></div>` : ''}
+  `, 'cards');
+}
+function cardFlip(){ if (!cards.flip){ cards.flip = true; cardScreen(); } }
+function cardNext(knew){
+  record(cards.list[cards.i], knew);
+  if (knew) cards.knew++;
+  cards.i++; cards.flip = false;
+  if (cards.i < cards.list.length) cardScreen(); else cardsEnd();
+}
+function cardsEnd(){
+  if (!cards || !cards.i) return goHome();
+  const n = cards.i;
+  if (cards.knew / n >= .8) confetti();
+  show(`<div class="res ${cards.knew / n >= .8 ? '' : 'fail'}"><div class="emo">🚦</div><h2>${cards.knew / n >= .8 ? 'מלכת התמרורים! 👑' : 'עוד סבב ואת שם!'}</h2>
+  <div class="score">${cards.knew} <small>/ ${n}</small></div><p>תמרורים שזכרת</p></div>
+  <div class="act" style="flex-direction:column"><button class="btn p" onclick="startCards()">🔁 עוד כרטיסיות</button><button class="btn" onclick="goHome()">🏠 למסך הבית</button></div>`, 'cardsEnd');
+}
+
+// ---------- navigation ----------
+function goHome(){
+  if (screen !== 'home' && history.state && history.state.s){ screen = 'leaving'; history.back(); return; }
+  screenHome();
+}
+// The phone's back button: from an exam ask first, from anywhere else go home.
+window.addEventListener('popstate', () => {
+  if (screen === 'leaving'){ screenHome(); return; }
+  if (screen === 'exam'){ history.pushState({s: 1}, ''); askLeaveExam(); return; }
+  screen = 'leaving'; screenHome();
+});
+
+screenHome();
+
+// Keep every sign picture on the phone so the app works without internet.
+function cacheImages(){
+  if (!('caches' in window) || localStorage.getItem('imgsCached') === String(APP_VERSION)) return;
+  const files = [...new Set(QUESTIONS.map(Qimg).filter(Boolean))];
+  let i = 0, fails = 0;
+  const next = () => {
+    if (i >= files.length){ if (!fails) try { localStorage.setItem('imgsCached', String(APP_VERSION)); } catch(e){} return; }
+    fetch('img/' + files[i++]).catch(() => fails++).finally(next);
+  };
+  for (let k = 0; k < 4; k++) next();
+}
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')){
+  navigator.serviceWorker.register('sw.js').then(reg => {
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) reg.update().catch(() => {}); });
+    navigator.serviceWorker.ready.then(() => setTimeout(cacheImages, 3000));
+  }).catch(() => {});
+  // A new version took over: reload, unless she is in the middle of something.
+  let hadController = !!navigator.serviceWorker.controller;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!hadController){ hadController = true; return; }
+    if (screen === 'home') location.reload();
+  });
+}
+</script>
+</body>
+</html>
